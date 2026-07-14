@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>YouTube</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      gap: 8px;
+      background: #0f0f0f;
+      flex-shrink: 0;
+    }
+    .header .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .header .logo span { color: #ff0000; }
+    .search-bar {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #272727;
+      border-radius: 20px;
+      padding: 4px 4px 4px 12px;
+      border: 1px solid #3f3f3f;
+    }
+    .search-bar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 13px;
+      padding: 4px 0;
+    }
+    .search-bar input::placeholder { color: #888; }
+    .search-bar button {
+      background: #3f3f3f;
+      border: none;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tabs {
+      display: flex;
+      gap: 6px;
+      padding: 8px 12px;
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      background: #272727;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      color: #aaa;
+      white-space: nowrap;
+      cursor: pointer;
+      border: none;
+    }
+    .tab.active { background: #fff; color: #0f0f0f; }
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 12px 12px;
+    }
+    .video {
+      display: flex;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #1f1f1f;
+      cursor: pointer;
+    }
+    .video:last-child { border-bottom: none; }
+    .video-thumb {
+      width: 120px;
+      height: 68px;
+      background: #272727;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #555;
+    }
+    .video-info { flex: 1; min-width: 0; }
+    .video-title {
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .video-meta {
+      font-size: 10px;
+      color: #888;
+      margin-top: 3px;
+    }
+    .video-channel {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #555;
+      font-size: 13px;
+      text-align: center;
+      gap: 8px;
+    }
+    .empty-state .icon { font-size: 40px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo"><span>You</span>Tube</div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search" maxlength="100">
+      <button id="searchBtn">&#128269;</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active">All</button>
+    <button class="tab">Music</button>
+    <button class="tab">Gaming</button>
+    <button class="tab">News</button>
+    <button class="tab">Live</button>
+  </div>
+  <div class="content" id="videoList">
+    <div class="empty-state">
+      <div class="icon">&#9654;</div>
+      <div>Search YouTube videos</div>
+      <div style="font-size:11px;color:#444">Videos open in a new tab</div>
+    </div>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const videoList = document.getElementById('videoList');
+
+    function searchYouTube(query) {
+      if (!query.trim()) return;
+      window.open('https://m.youtube.com/results?search_query=' + encodeURIComponent(query.trim()), '_blank');
+    }
+
+    searchBtn.addEventListener('click', () => searchYouTube(searchInput.value));
+    searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchYouTube(searchInput.value); });
+
+    // Static suggestions
+    const suggestions = [
+      { title: 'Spider-Man: No Way Home - Official Trailer', channel: 'Marvel Entertainment', meta: '84M views · 2 years ago' },
+      { title: 'Spider-Man Across the Spider-Verse | Official Trailer', channel: 'Sony Pictures', meta: '32M views · 1 year ago' },
+      { title: 'Learn JavaScript in 1 Hour', channel: 'Programming with Mosh', meta: '12M views · 4 years ago' },
+      { title: 'Python for Beginners - Full Course', channel: 'freeCodeCamp.org', meta: '18M views · 5 years ago' },
+      { title: 'The Dark Knight - Batman vs Joker Scene', channel: 'Warner Bros.', meta: '45M views · 10 years ago' },
+    ];
+
+    function renderSuggestions() {
+      videoList.innerHTML = suggestions.map((v, i) => {
+        const query = encodeURIComponent(v.title);
+        return '<div class="video" onclick="window.open(\'https://m.youtube.com/results?search_query=' + query + '\', \'_blank\')">' +
+          '<div class="video-thumb">&#9654;</div>' +
+          '<div class="video-info">' +
+          '<div class="video-title">' + v.title + '</div>' +
+          '<div class="video-channel">' + v.channel + '</div>' +
+          '<div class="video-meta">' + v.meta + '</div>' +
+          '</div></div>';
+      }).join('');
+    }
+
+    renderSuggestions();
+  </script>
+</body>
+</html>

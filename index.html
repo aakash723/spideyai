@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spidey AI</title>
+  <meta property="og:title" content="Spidey AI">
+  <meta property="og:description" content="Your friendly neighborhood Spider-Man AI companion">
+  <meta property="og:image" content="https://localhost:5173/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/simulator/iphone.css" />
+  <link rel="stylesheet" href="/mobile-landscape.css" />
+  <script>
+    // Ensure a completely fresh user profile on first visit to the deployed product
+    if (!localStorage.getItem('spidey_ai_fresh_prod_v2')) {
+      for (var key in localStorage) {
+        if (key.indexOf('spidey_ai_') === 0 || key === 'spideyTechMissions' || key === 'spidey_photos') {
+          localStorage.removeItem(key);
+        }
+      }
+      localStorage.setItem('spidey_ai_fresh_prod_v2', 'true');
+    }
+  </script>
+  <script type="module" crossorigin src="/assets/spidey-CvfTzwK3.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/spidey-HsjSoBlw.css">
+</head>
+<body>
+  <!-- Mobile Landscape Mode Enforcer Overlay -->
+  <div id="rotate-overlay">
+    <div class="phone-icon"></div>
+    <h2>LANDSCAPE MODE REQUIRED</h2>
+    <p>Please rotate your phone to landscape to play Spidey AI companion.</p>
+  </div>
+
+  <div id="bg-layer"></div>
+  <div id="hud">
+    <div class="hud-scanlines"></div>
+
+    <!-- TOP: Level & XP -->
+    <div class="hud-top">
+      <div class="level-badge">
+        <span class="level-num">LEVEL 1</span>
+        <span class="level-title">Newcomer</span>
+      </div>
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
+        <div class="xp-bar-glow"></div>
+      </div>
+      <div class="xp-text">
+        <span id="xpCurrent">0</span> / <span id="xpMax">1000</span> XP
+      </div>
+    </div>
+
+    <!-- ACTIVE MISSION -->
+    <div class="hud-card mission-card" id="activeMissionCard">
+      <div class="card-header">ACTIVE MISSION</div>
+    </div>
+
+    <!-- PROGRESS MAP -->
+    <div class="hud-card map-card">
+      <div class="card-header map-header">
+        <span>PROGRESS MAP</span>
+        <span class="map-status" id="mapStatus">Scanning...</span>
+      </div>
+      <div class="map-legend" id="mapLegend">
+        <span class="legend-item"><img src="/mission-marker.png" class="legend-icon">Mission</span>
+        <span class="legend-item"><img src="/sidequest-marker.png" class="legend-icon">Quest</span>
+        <span class="legend-item"><img src="/spidey-marker.png" class="legend-icon">You</span>
+        <span class="legend-spacer"></span>
+        <span class="map-toggle active" data-layer="street">Street</span>
+        <span class="map-toggle" data-layer="dark">Dark</span>
+        <span class="map-toggle" data-layer="satellite">Sat</span>
+      </div>
+      <div class="map-container" id="mapContainer">
+        <div id="leafletMap" class="leaflet-map"></div>
+      </div>
+    </div>
+
+    <!-- SIDE QUESTS -->
+    <div class="hud-card quests-card">
+      <div class="card-header">SIDE QUESTS</div>
+      <div class="quest-list" id="questList">
+        <label class="quest-item"><input type="checkbox"><span class="quest-text">Gym</span></label>
+        <label class="quest-item"><input type="checkbox"><span class="quest-text">Drink Water</span></label>
+        <label class="quest-item"><input type="checkbox"><span class="quest-text">Skate</span></label>
+        <label class="quest-item"><input type="checkbox"><span class="quest-text">Buy Groceries</span></label>
+      </div>
+    </div>
+
+    <!-- SPIDEY SUGGESTS -->
+    <div class="hud-card suggest-card" id="suggestCard">
+      <div class="card-header">SPIDEY SUGGESTS</div>
+      <div id="suggestContent" class="suggest-content">Waiting for opportunity...</div>
+    </div>
+
+    <!-- TECHNICAL MISSIONS -->
+    <div class="hud-card missions-card" id="missionsCard">
+      <div class="card-header">TECHNICAL MISSIONS <span class="missions-badge" id="missionsBadge">0/5</span></div>
+      <div id="missionsList" class="missions-list">
+        <div class="missions-idle">Initializing mission queue...</div>
+      </div>
+    </div>
+
+    <!-- AI INSIGHTS -->
+    <div class="hud-card insight-card">
+      <div class="card-header">AI INSIGHTS</div>
+      <div class="insight-content" id="insightContent">Leave in 12 minutes.</div>
+    </div>
+
+    <!-- TODAY'S PROGRESS -->
+    <div class="hud-card progress-card">
+      <div class="card-header">TODAY'S PROGRESS</div>
+      <div class="progress-categories" id="progressCategories">
+        <div class="progress-cat"><span class="cat-label">Productivity</span><div class="cat-track"><div class="cat-fill" style="width:0%"></div></div><span class="cat-pct">0%</span></div>
+        <div class="progress-cat"><span class="cat-label">Creativity</span><div class="cat-track"><div class="cat-fill" style="width:0%"></div></div><span class="cat-pct">0%</span></div>
+        <div class="progress-cat"><span class="cat-label">Fitness</span><div class="cat-track"><div class="cat-fill" style="width:0%"></div></div><span class="cat-pct">0%</span></div>
+        <div class="progress-cat"><span class="cat-label">Learning</span><div class="cat-track"><div class="cat-fill" style="width:0%"></div></div><span class="cat-pct">0%</span></div>
+        <div class="progress-cat"><span class="cat-label">Fun</span><div class="cat-track"><div class="cat-fill" style="width:0%"></div></div><span class="cat-pct">0%</span></div>
+      </div>
+    </div>
+
+    <!-- STREAKS -->
+    <div class="hud-card streaks-card">
+      <div class="card-header">STREAKS</div>
+      <div class="streaks-list">
+        <div class="streak-item"><span class="streak-emoji">⚡</span><span class="streak-name">Productivity</span><span class="streak-count">0 Days</span></div>
+        <div class="streak-item"><span class="streak-emoji">🎨</span><span class="streak-name">Creativity</span><span class="streak-count">0 Days</span></div>
+        <div class="streak-item"><span class="streak-emoji">💪</span><span class="streak-name">Fitness</span><span class="streak-count">0 Days</span></div>
+      </div>
+    </div>
+
+    <!-- STATISTICS DASHBOARD -->
+    <div class="hud-card stats-card">
+      <div class="card-header">STATISTICS</div>
+      <div id="statsContent" class="stats-content"></div>
+    </div>
+
+    <!-- ACHIEVEMENT TOAST -->
+    <div class="achievement-toast" id="achievementToast">
+      <div class="toast-header">MISSION COMPLETE</div>
+      <div class="toast-xp">+150 XP</div>
+      <div class="toast-achievement">Achievement Unlocked: Friendly Neighborhood Hero</div>
+    </div>
+
+    <!-- WALL OF GLORY -->
+    <div class="hud-card glory-card" id="gloryCard">
+      <div class="card-header">WALL OF GLORY</div>
+      <div class="glory-grid" id="gloryGrid"></div>
+    </div>
+
+    <div class="hud-card suit-card" id="suitCard">
+      <div class="card-header">SUITS</div>
+      <div class="suit-grid" id="suitGrid"></div>
+    </div>
+
+    <!-- User Controls -->
+    <div class="hud-card user-controls">
+      <div class="user-controls-row">
+        <span class="user-label" id="userLabel">User: default</span>
+        <button class="user-btn" id="exportUserBtn">📤</button>
+        <button class="user-btn" id="importUserBtn">📥</button>
+      </div>
+      <div class="user-controls-row" style="margin-top:4px;">
+        <label class="proactive-toggle" id="proactiveToggle">
+          <input type="checkbox" checked> <span>AI Chat</span>
+        </label>
+        <span style="font-size:8px;color:rgba(255,255,255,0.3);margin-left:auto;">every 30s</span>
+      </div>
+      <input type="file" id="importFileInput" accept=".json" style="display:none">
+    </div>
+  </div>
+
+  <canvas id="renderCanvas"></canvas>
+
+  <!-- Celebration Overlay -->
+  <div id="celebrationOverlay" class="celebration-overlay hidden">
+    <div class="celebration-bg"></div>
+    <div class="celebration-content">
+      <div class="celebration-sparkle">✦</div>
+      <div class="celebration-label">ACHIEVEMENT UNLOCKED</div>
+      <img class="celebration-card" id="celebrationCard" src="" alt="" />
+      <div class="celebration-name" id="celebrationName"></div>
+      <div class="celebration-sub" id="celebrationSub"></div>
+      <div class="celebration-actions">
+        <button class="celebration-btn" id="celebrationContinueBtn">CONTINUE</button>
+        <button class="celebration-btn secondary" id="celebrationScreenshotBtn">📷 SCREENSHOT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Text Input -->
+  <div id="inputArea" class="input-area">
+    <textarea id="textInput" placeholder="Message Spidey..." rows="1"></textarea>
+    <button id="speakBtn" class="speak-btn"></button>
+  </div>
+
+  <!-- Status -->
+  <div id="status" class="status" style="opacity:0">Ready</div>
+
+  <!-- Subtitle -->
+  <div id="subtitle" class="subtitle"></div>
+
+  <!-- iPhone Simulator -->
+  <div id="iphone">
+    <div class="s-iphone">
+      <section class="iphoneMock">
+        <div class="container">
+          <div class="iphone initAnimation">
+            <div class="borderColor">
+              <div class="buttons">
+                <div class="switch"></div>
+                <div class="vol up"></div>
+                <div class="vol down"></div>
+                <div class="touchID"></div>
+              </div>
+              <div class="backSide">
+                <div class="cameras">
+                  <div class="cam"><div class="lens"></div></div>
+                  <div class="cam"><div class="lens"></div></div>
+                  <div class="cam"><div class="lens"></div></div>
+                  <div class="flash"></div>
+                  <div class="sensor"></div>
+                </div>
+                <div class="logo">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M48.334 33.875c-.093-7.593 6.169-11.249 6.45-11.436a13.669 13.669 0 0 0-10.936-5.906c-4.674-.469-9.067 2.718-11.5 2.718-2.337 0-5.982-2.718-9.908-2.625a14.765 14.765 0 0 0-12.339 7.5C4.868 33.313 8.794 47 13.935 54.4c2.524 3.656 5.515 7.78 9.441 7.593 3.832-.187 5.235-2.437 9.815-2.437S39.08 62 43.1 61.9c4.113-.094 6.637-3.75 9.16-7.405a29.782 29.782 0 0 0 4.113-8.53 13.082 13.082 0 0 1-8.039-12.09z"></path>
+                    <path d="M40.762 11.565A13.423 13.423 0 0 0 43.847 2a13.194 13.194 0 0 0-8.787 4.5c-1.963 2.25-3.645 5.812-3.178 9.28 3.365.284 6.824-1.68 8.88-4.215z"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="blackBorder">
+                <div class="notch">
+                  <div class="megaphone"></div>
+                  <div class="camera"></div>
+                </div>
+                <div class="logo">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M48.334 33.875c-.093-7.593 6.169-11.249 6.45-11.436a13.669 13.669 0 0 0-10.936-5.906c-4.674-.469-9.067 2.718-11.5 2.718-2.337 0-5.982-2.718-9.908-2.625a14.765 14.765 0 0 0-12.339 7.5C4.868 33.313 8.794 47 13.935 54.4c2.524 3.656 5.515 7.78 9.441 7.593 3.832-.187 5.235-2.437 9.815-2.437S39.08 62 43.1 61.9c4.113-.094 6.637-3.75 9.16-7.405a29.782 29.782 0 0 0 4.113-8.53 13.082 13.082 0 0 1-8.039-12.09z"></path>
+                    <path d="M40.762 11.565A13.423 13.423 0 0 0 43.847 2a13.194 13.194 0 0 0-8.787 4.5c-1.963 2.25-3.645 5.812-3.178 9.28 3.365.284 6.824-1.68 8.88-4.215z"></path>
+                  </svg>
+                </div>
+                <div class="mainScreen locked">
+                  <div class="statusBar">
+                    <div class="leftSide">
+                      <div class="operator">Jio</div>
+                      <div class="hour hidden"></div>
+                      <div class="widgetPlus"></div>
+                    </div>
+                    <div class="rightSide">
+                      <div class="signal mid"><i class="bar"></i></div>
+                      <div class="data">4G</div>
+                      <div class="battery mid">
+                        <div class="shell"><div class="percent" style="width:65%"></div></div>
+                        <div class="lead"><div class="tip"></div></div>
+                        <div class="percent-value" style="color:#000;font-weight:bold;font-size:9px;z-index:9;margin:80px;"></div>
+                      </div>
+                      <div class="exitShake">Done</div>
+                    </div>
+                  </div>
+                  <div class="lockScreen">
+                    <div class="up">
+                      <div class="lockIcon"></div>
+                      <div class="hour"></div>
+                      <div class="date">Wednesday, 16 of September</div>
+                    </div>
+                    <div class="down">
+                      <div class="sysIcon flash">
+                        <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 400 400">
+                          <path d="M117,62.85v13.72c0,32.45,10.64,61.49,27.43,81.57v206.43h109.71V158.14c16.79-20.08,27.43-49.12,27.43-81.57 V62.85H117z M203.37,246.86c0,6.45-10,6.43-10,0v-41.88c0-6.45,10-6.43,10,0V246.86z M259.35,73.33H136.65c-6.45,0-6.43-10,0-10 h122.69C265.79,63.33,265.78,73.33,259.35,73.33z"/>
+                          <path d="M144.43,364.57v13.71c0,7.57,6.14,13.72,13.71,13.72h82.29c7.57,0,13.71-6.15,13.71-13.72v-13.71H144.43z"/>
+                        </svg>
+                      </div>
+                      <div class="sysIcon camera">
+                        <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 512 512">
+                          <circle cx="256" cy="296" r="81"/>
+                          <path d="m374.297 91-5.177-25.883c-2.794-13.974-15.166-24.117-29.417-24.117h-167.406c-14.25 0-26.623 10.143-29.417 24.117l-5.177 25.883z"/>
+                          <path d="m467 121c-35.223 0-405.516 0-422 0-24.813 0-45 20.187-45 45v260c0 24.813 20.187 45 45 45h422c24.813 0 45-20.187 45-45v-260c0-24.813-20.187-45-45-45zm-339 94h-48c-8.284 0-15-6.716-15-15s6.716-15 15-15h48c8.284 0 15 6.716 15 15s-6.716 15-15 15zm128 192c-61.206 0-111-49.794-111-111s49.794-111 111-111 111 49.794 111 111-49.794 111-111 111z"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="unlockBar" data-msg="Swipe up to Unlock"></div>
+                  </div>
+                  <div class="appScreen hidden">
+                    <div class="mainApps"><div class="wrapperApps"></div></div>
+                    <div class="wrapperDots"></div>
+                    <div class="deckApps">
+                      <div class="app" data-indeck="1"><div class="icon" style="background-image:url(/simulator/Icons/Phone.png)"></div></div>
+                      <div class="app" data-indeck="2"><div class="icon" style="background-image:url(/simulator/Icons/Safari.png)"></div></div>
+                      <div class="app" data-indeck="3"><div class="icon" style="background-image:url(/simulator/Icons/iOsMessage.png)"></div></div>
+                      <div class="app" data-indeck="4"><div class="icon" style="background-image:url(/simulator/Icons/AppleMusic.png)"></div></div>
+                      <div class="app" data-indeck="5"><div class="icon" style="background-image:url(/simulator/Icons/YouTube.png)"></div></div>
+                    </div>
+                  </div>
+                  <div class="widgetCenter hidden">
+                    <div class="seeker"><div class="icon"></div>Search</div>
+                    <div class="contents">
+
+                      <div class="block midd events"><p class="txt">No more events for today</p></div>
+                      <div class="block midd batteryInfo" data-load="59">
+                        <div class="iconWrapper">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                            <path d="M14 59a3 3 0 0 0 3 3h30a3 3 0 0 0 3-3v-9H14zM50 5a3 3 0 0 0-3-3H17a3 3 0 0 0-3 3v5h36zm0 45V10m-36 0v40"/>
+                            <circle cx="32" cy="56" r="2"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="block screenTime">
+                        <p class="time">3h 27min</p>
+                      </div>
+                      <div class="editButton">Edit</div>
+                    </div>
+                  </div>
+                  <div class="controlCenter hidden">
+                    <div class="content">
+                      <div class="iconsGroup iconWrapper-wX2 padding">
+                        <div class="actionIcon icon airplaneMode"><div class="ico"><svg viewBox="0 0 510 510" style="transform:rotate(90deg)"><path d="M497.25,357v-51l-204-127.5V38.25C293.25,17.85,275.4,0,255,0c-20.4,0-38.25,17.85-38.25,38.25V178.5L12.75,306v51l204-63.75V433.5l-51,38.25V510L255,484.5l89.25,25.5v-38.25l-51-38.25V293.25L497.25,357z"/></svg></div><div class="txt"><p class="name">Flight Mode</p><p class="val">No</p></div></div>
+                        <div class="actionIcon icon cellularData active"><div class="ico"><svg viewBox="0 0 510 510"><path d="m255.991 169.039c-30.327 0-55 24.673-55 55 0 25.127 16.943 46.356 40 52.904v171.096c0 8.284 6.716 15 15 15s15-6.716 15-15v-171.096c23.057-6.547 40-27.777 40-52.904 0-30.327-24.673-55-55-55z"/></svg></div><div class="txt"><p class="name">Cellular Data</p><p class="val">No</p></div></div>
+                      </div>
+                    </div>
+                    <div class="hiddenCC"></div>
+                  </div>
+
+                  <!-- Spidey Messages App -->
+                  <div class="spidey-msg hidden">
+                    <div class="spidey-msg-header">
+                      <span class="spidey-msg-back">&#8592;</span>
+                      <span class="spidey-msg-contact">Spidey AI</span>
+                    </div>
+                    <div class="spidey-msg-body"></div>
+                  </div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="interactionInfo hidden">
+            <h1>iPhone 12 iOS 14</h1>
+            <p>Interactive interface of <b>iPhone 12</b> with the new <b>iOS 14.</b></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="/simulator/iphone.js"></script>
+<script>
+(function() {
+  var MISSIONS_KEY = 'spideyTechMissions';
+  var MAX_MISSIONS = 5;
+  var INTERVAL_MS = 60000;
+
+  var iconPaths = [
+    '/achievements/achive1.jpg',
+    '/achievements/achieve_3.jpg',
+    '/achievements/achiev_4.jpg',
+    '/simulator/Icons/Compass.png',
+    '/simulator/Icons/Settings.png',
+    '/simulator/Icons/FindMy.png',
+    '/simulator/Icons/Health.png',
+    '/simulator/Icons/Clock.png',
+    '/simulator/Icons/Calculator.png',
+    '/simulator/Icons/Weather.png'
+  ];
+  var missionPool = [
+    {icon:0, title:'Optimize database query performance', xp:150},
+    {icon:0, title:'Refactor authentication module', xp:120},
+    {icon:0, title:'Reduce bundle size in webpack config', xp:100},
+    {icon:1, title:'Audit npm dependencies for vulnerabilities', xp:130},
+    {icon:1, title:'Review API endpoint security headers', xp:110},
+    {icon:2, title:'Train ML model on new dataset', xp:200},
+    {icon:2, title:'Implement RAG pipeline for knowledge base', xp:180},
+    {icon:3, title:'Fix UI rendering bug on mobile', xp:90},
+    {icon:3, title:'Write unit tests for mission module', xp:100},
+    {icon:3, title:'Add error boundary to React components', xp:80},
+    {icon:4, title:'Set up CI/CD with GitHub Actions', xp:160},
+    {icon:4, title:'Configure WebSocket reconnection logic', xp:110},
+    {icon:5, title:'Build responsive weather card component', xp:100},
+    {icon:5, title:'Create dark mode theme toggle', xp:90},
+    {icon:5, title:'Implement drag-and-drop file upload', xp:120},
+    {icon:6, title:'Debug memory leak in animation loop', xp:150},
+    {icon:6, title:'Fix cross-browser CSS compatibility', xp:80},
+    {icon:7, title:'Optimize API response caching strategy', xp:140},
+    {icon:7, title:'Implement rate limiting middleware', xp:110},
+    {icon:7, title:'Set up message queue for async tasks', xp:130},
+    {icon:8, title:'Build real-time analytics dashboard', xp:170},
+    {icon:8, title:'Log and monitor system performance metrics', xp:100},
+    {icon:9, title:'Research latest web framework updates', xp:70},
+    {icon:9, title:'Document API endpoints with OpenAPI spec', xp:90},
+    {icon:9, title:'Create developer onboarding guide', xp:80},
+    {icon:0, title:'Migrate legacy code to TypeScript', xp:140},
+    {icon:3, title:'Implement search with debounced input', xp:100},
+    {icon:5, title:'Add keyboard shortcuts for power users', xp:90},
+    {icon:4, title:'Set up database indexing for queries', xp:120},
+    {icon:1, title:'Run penetration test on login flow', xp:160},
+    {icon:2, title:'Fine-tune LLM for domain-specific tasks', xp:220},
+    {icon:3, title:'Build PWA with offline support', xp:150},
+    {icon:6, title:'Reduce API response time by 200ms', xp:130},
+    {icon:8, title:'Generate weekly performance report', xp:80},
+    {icon:9, title:'Experiment with new state management', xp:100}
+  ];
+
+  function getMissions() {
+    try { return JSON.parse(localStorage.getItem(MISSIONS_KEY) || '[]'); } catch(e) { return []; }
+  }
+
+  function saveMissions(list) { localStorage.setItem(MISSIONS_KEY, JSON.stringify(list)); }
+
+  function getUsedIds() { return getMissions().map(function(m){ return m.id; }); }
+
+  function generateOne() {
+    var used = getUsedIds();
+    var available = missionPool.filter(function(m){ return used.indexOf(m.title) === -1; });
+    if (available.length === 0) {
+      localStorage.removeItem(MISSIONS_KEY);
+      available = missionPool;
+    }
+    var pick = available[Math.floor(Math.random() * available.length)];
+    return {
+      id: pick.title,
+      title: pick.title,
+      icon: pick.icon,
+      xp: pick.xp,
+      added: Date.now()
+    };
+  }
+
+  function addXP(val, missionTitle) {
+    try {
+      if (window.__store && window.__store.set) {
+        var xp = (window.__store.get('user.xp') || 0) + val;
+        window.__store.set('user.xp', xp);
+        var completed = window.__store.get('missions.completed') || [];
+        completed.push({ id: 'tech_' + Date.now(), title: missionTitle || 'Tech Mission', xp: val, completedAt: Date.now() });
+        window.__store.set('missions.completed', completed);
+        var level = window.__store.get('user.level') || 1;
+        var xpNeeded = level * 300;
+        while (xp >= xpNeeded) {
+          xp -= xpNeeded;
+          level++;
+          xpNeeded = level * 300;
+          window.__store.set('user.level', level);
+        }
+        window.__store.set('user.xp', xp);
+        // Trigger full HUD refresh
+        if (window.mn && window.mn.refresh) {
+          window.mn.refresh();
+        }
+      }
+    } catch(e) {}
+  }
+
+  function render() {
+    var list = getMissions();
+    var el = document.getElementById('missionsList');
+    var badge = document.getElementById('missionsBadge');
+    if (!el) return;
+    if (badge) badge.textContent = list.length + '/' + MAX_MISSIONS;
+    if (list.length === 0) {
+      el.innerHTML = '<div class="missions-idle">Generating next mission...</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+      var m = list[i];
+      var iconSrc = iconPaths[m.icon] || iconPaths[0];
+      html += '<div class="missions-item" data-idx="' + i + '">' +
+        '<span class="missions-icon"><img src="' + iconSrc + '" class="missions-img"></span>' +
+        '<span class="missions-title">' + m.title + '</span>' +
+        '<span class="missions-xp">+' + m.xp + 'XP</span>' +
+        '</div>';
+    }
+    el.innerHTML = html;
+    el.querySelectorAll('.missions-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx, 10);
+        var current = getMissions();
+        if (idx >= current.length) return;
+        var done = current.splice(idx, 1);
+        saveMissions(current);
+        addXP(done[0].xp, done[0].title);
+        render();
+        setTimeout(function() {
+          var btn = document.querySelector('.stats-period-btn.active');
+          if (btn) btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        }, 100);
+      });
+    });
+  }
+
+  function tick() {
+    var list = getMissions();
+    if (list.length < MAX_MISSIONS) {
+      list.push(generateOne());
+      saveMissions(list);
+    }
+    render();
+  }
+
+  tick();
+  setInterval(tick, INTERVAL_MS);
+})();
+</script>
+<script>
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'd') {
+    e.preventDefault();
+    console.log('=== DEBUG DUMP (Ctrl+D) ===');
+    console.log('missions.completed:', JSON.parse(JSON.stringify(window.__store ? window.__store.get('missions.completed') : 'N/A')));
+    console.log('missions.failed:', JSON.parse(JSON.stringify(window.__store ? window.__store.get('missions.failed') : 'N/A')));
+    console.log('stats.period:', window.__store ? window.__store.get('stats.period') : 'N/A');
+    console.log('user.xp:', window.__store ? window.__store.get('user.xp') : 'N/A');
+    console.log('localStorage:', JSON.parse(localStorage.getItem('spidey_ai_default') || '{}'));
+    console.log('===========================');
+  }
+});
+</script>
+</body>
+</html>

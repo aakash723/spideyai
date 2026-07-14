@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Calculator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{height:100%;overflow:hidden}
+body{background:#000;color:#fff;font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;display:flex;flex-direction:column;padding:10px 14px 14px;gap:0}
+/* Toolbar */
+.toolbar{display:flex;gap:12px;padding:2px 2px 6px;flex-shrink:0}
+.toolbar button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(107,107,107,0.3);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.toolbar button:active{background:rgba(107,107,107,0.55);transform:scale(.92)}
+/* Display */
+.display{flex-shrink:0;text-align:right;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-height:0;flex:1;padding:0 4px 8px}
+.expression{font-size:clamp(16px,4vw,28px);font-weight:300;color:#8E8E93;min-height:1.4em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:rtl;text-align:left}
+.result{font-size:clamp(36px,9vw,72px);font-weight:200;color:#fff;line-height:1.1;min-height:1.2em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:rtl;text-align:left;transition:all .25s ease}
+/* Grid */
+.grid-wrap{flex-shrink:0;padding:0 2px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,1.8vw,12px);width:100%}
+.btn{aspect-ratio:1;border-radius:50%;border:none;font-size:clamp(20px,5vw,36px);font-weight:300;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s ease;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.btn:active{transform:scale(.96);filter:brightness(85%)}
+.btn-num{background:#333}
+.btn-num:active{background:#444}
+.btn-func{background:#6B6B6B;font-size:clamp(16px,4vw,28px)}
+.btn-func:active{background:#7B7B7B}
+.btn-op{background:#FF9F0A;font-size:clamp(22px,5.5vw,38px)}
+.btn-op:active{background:#FFB340}
+.btn-op.active-op{background:#fff;color:#FF9F0A}
+.btn-zero{aspect-ratio:auto;grid-column:span 2;border-radius:40px;justify-content:flex-start;padding-left:clamp(18px,4vw,28px)}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button id="toolHist">∞</button>
+  <button id="toolSci">π</button>
+</div>
+
+<div class="display">
+  <div class="expression" id="expression"></div>
+  <div class="result" id="result">0</div>
+</div>
+
+<div class="grid-wrap">
+<div class="grid" id="grid">
+  <button class="btn btn-func" id="btnAC" onclick="pressAC()">AC</button>
+  <button class="btn btn-func" onclick="pressPM()">±</button>
+  <button class="btn btn-func" onclick="pressPct()">%</button>
+  <button class="btn btn-op" onclick="pressOp('÷')">÷</button>
+
+  <button class="btn btn-num" onclick="pressNum('7')">7</button>
+  <button class="btn btn-num" onclick="pressNum('8')">8</button>
+  <button class="btn btn-num" onclick="pressNum('9')">9</button>
+  <button class="btn btn-op" onclick="pressOp('×')">×</button>
+
+  <button class="btn btn-num" onclick="pressNum('4')">4</button>
+  <button class="btn btn-num" onclick="pressNum('5')">5</button>
+  <button class="btn btn-num" onclick="pressNum('6')">6</button>
+  <button class="btn btn-op" onclick="pressOp('−')">−</button>
+
+  <button class="btn btn-num" onclick="pressNum('1')">1</button>
+  <button class="btn btn-num" onclick="pressNum('2')">2</button>
+  <button class="btn btn-num" onclick="pressNum('3')">3</button>
+  <button class="btn btn-op" onclick="pressOp('+')">+</button>
+
+  <button class="btn btn-num btn-zero" onclick="pressNum('0')">0</button>
+  <button class="btn btn-num" onclick="pressDot()">.</button>
+  <button class="btn btn-op" onclick="pressEquals()">=</button>
+</div>
+</div>
+
+<script>
+let cur = '0', expr = '', op = null, prev = null;
+let resetNext = false, justEvaluated = false, hasInput = false;
+
+const resultEl = document.getElementById('result');
+const exprEl = document.getElementById('expression');
+const acBtn = document.getElementById('btnAC');
+
+function updateDisplay() {
+  let v = cur;
+  let c = 'result';
+  if (v.length > 12) c += ' shrink3';
+  else if (v.length > 9) c += ' shrink2';
+  else if (v.length > 6) c += ' shrink';
+  resultEl.className = c;
+  resultEl.textContent = v;
+  exprEl.textContent = expr;
+  acBtn.textContent = hasInput ? 'C' : 'AC';
+}
+
+function pressNum(n) {
+  if (justEvaluated) { cur = '0'; expr = ''; op = null; prev = null; resetNext = false; justEvaluated = false; }
+  if (resetNext) { cur = '0'; resetNext = false; }
+  if (cur === '0' && n !== '.') cur = n;
+  else if (cur.length < 15) cur += n;
+  hasInput = true;
+  deselectOps();
+  updateDisplay();
+}
+
+function pressDot() {
+  if (resetNext || justEvaluated) { cur = '0'; resetNext = false; justEvaluated = false; }
+  if (!cur.includes('.')) cur += '.';
+  hasInput = true;
+  updateDisplay();
+}
+
+function pressOp(o) {
+  justEvaluated = false;
+  if (op !== null && !resetNext) evaluate(false);
+  prev = parseFloat(cur);
+  op = o;
+  resetNext = true;
+  expr = formatNum(prev) + ' ' + o;
+  hasInput = true;
+  selectOp(o);
+  updateDisplay();
+}
+
+function pressEquals() {
+  if (op === null) return;
+  justEvaluated = true;
+  evaluate(true);
+  deselectOps();
+}
+
+function evaluate(showEquals) {
+  if (op === null) return;
+  const a = prev, b = parseFloat(cur);
+  let res;
+  switch (op) {
+    case '÷': res = b === 0 ? 'Error' : a / b; break;
+    case '×': res = a * b; break;
+    case '−': res = a - b; break;
+    case '+': res = a + b; break;
+    default: res = b;
+  }
+  expr = formatNum(a) + ' ' + op + ' ' + formatNum(b) + (showEquals ? ' =' : '');
+  cur = res === 'Error' ? 'Error' : formatRes(res);
+  prev = null; op = null; resetNext = true;
+  hasInput = true;
+  updateDisplay();
+}
+
+function pressAC() {
+  if (hasInput) { cur = '0'; expr = ''; op = null; prev = null; resetNext = false; justEvaluated = false; hasInput = false; }
+  deselectOps();
+  updateDisplay();
+}
+
+function pressPM() {
+  if (cur === '0' || cur === 'Error') return;
+  cur = cur.startsWith('-') ? cur.slice(1) : '-' + cur;
+  updateDisplay();
+}
+
+function pressPct() {
+  cur = formatRes(parseFloat(cur) / 100);
+  hasInput = true;
+  updateDisplay();
+}
+
+function formatNum(n) {
+  if (!isFinite(n)) return 'Error';
+  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toString();
+  const s = n.toString();
+  return s.length > 14 ? n.toExponential(5) : s;
+}
+
+function formatRes(n) {
+  if (!isFinite(n)) return 'Error';
+  const s = parseFloat(n.toFixed(10)).toString();
+  if (s.length > 15) return n.toExponential(6);
+  return s;
+}
+
+function selectOp(o) {
+  deselectOps();
+  document.querySelectorAll('.btn-op').forEach(b => {
+    if (b.textContent === o) b.classList.add('active-op');
+  });
+}
+
+function deselectOps() {
+  document.querySelectorAll('.btn-op').forEach(b => b.classList.remove('active-op'));
+}
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+  if (e.key >= '0' && e.key <= '9') pressNum(e.key);
+  else if (e.key === '.') pressDot();
+  else if (e.key === '+') pressOp('+');
+  else if (e.key === '-') pressOp('−');
+  else if (e.key === '*') pressOp('×');
+  else if (e.key === '/') { e.preventDefault(); pressOp('÷'); }
+  else if (e.key === 'Enter' || e.key === '=') pressEquals();
+  else if (e.key === 'Escape') { hasInput = true; pressAC(); }
+  else if (e.key === 'Backspace') { if (cur.length > 1) cur = cur.slice(0,-1); else cur = '0'; hasInput = cur !== '0'; updateDisplay(); }
+  else if (e.key === '%') pressPct();
+});
+</script>
+</body>
+</html>

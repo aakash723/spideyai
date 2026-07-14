@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Human</title>
+  <link rel="stylesheet" href="/simulator/iphone.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/spidey-CvfTzwK3.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-l0I9RRae.css">
+  <link rel="stylesheet" href="/mobile-landscape.css" />
+</head>
+<body>
+  <!-- Mobile Landscape Mode Enforcer Overlay -->
+  <div id="rotate-overlay">
+    <div class="phone-icon"></div>
+    <h2>LANDSCAPE MODE REQUIRED</h2>
+    <p>Please rotate your phone to landscape to play Spidey AI companion.</p>
+  </div>
+
+  <canvas id="renderCanvas"></canvas>
+
+  <!-- Text Input -->
+  <div id="inputArea" class="input-area">
+    <textarea id="textInput" placeholder="Type something for Hana to say..." rows="1"></textarea>
+    <button id="speakBtn" class="speak-btn"></button>
+  </div>
+
+  <!-- Status -->
+  <div id="status" class="status">Loading...</div>
+
+  <!-- Subtitle -->
+  <div id="subtitle" class="subtitle"></div>
+
+  <!-- Webcam PIP -->
+  <div id="webcamContainer" class="webcam-pip hidden">
+    <video id="webcam" autoplay playsinline></video>
+  </div>
+
+  <!-- Right side toggles -->
+  <div style="position:fixed;top:60px;right:16px;z-index:30;display:flex;gap:8px;flex-direction:column;">
+    <button id="charToggle" class="panel-toggle">👤</button>
+    <button id="boneToggle" class="panel-toggle">☰</button>
+    <button id="animToggle" class="panel-toggle">🎬</button>
+    <button id="liveToggle" class="panel-toggle">🎥</button>
+  </div>
+
+  <!-- Animation Panel -->
+  <div id="animPanel" class="bone-panel hidden" style="top:140px;"></div>
+
+  <!-- Live Link control bar -->
+  <div id="liveBar" class="live-bar hidden">
+    <button id="recBtn" class="rec-btn">● Record</button>
+    <input id="presetName" type="text" placeholder="Name..." class="preset-input" />
+    <select id="presetSelect" class="preset-select"><option value="">No preset</option></select>
+  </div>
+
+  <!-- Bone Control Panel -->
+  <div id="bonePanel" class="bone-panel hidden" style="top:140px;"></div>
+
+  <!-- Character Selection Panel -->
+  <div id="charPanel" class="bone-panel char-panel hidden" style="top:140px;"></div>
+
+  <!-- iPhone Simulator -->
+  <div id="iphone">
+    <div class="s-iphone">
+      <section class="iphoneMock">
+        <div class="container">
+          <div class="iphone initAnimation">
+            <div class="borderColor">
+              <div class="buttons">
+                <div class="switch"></div>
+                <div class="vol up"></div>
+                <div class="vol down"></div>
+                <div class="touchID"></div>
+              </div>
+              <div class="backSide">
+                <div class="cameras">
+                  <div class="cam"><div class="lens"></div></div>
+                  <div class="cam"><div class="lens"></div></div>
+                  <div class="cam"><div class="lens"></div></div>
+                  <div class="flash"></div>
+                  <div class="sensor"></div>
+                </div>
+                <div class="logo">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M48.334 33.875c-.093-7.593 6.169-11.249 6.45-11.436a13.669 13.669 0 0 0-10.936-5.906c-4.674-.469-9.067 2.718-11.5 2.718-2.337 0-5.982-2.718-9.908-2.625a14.765 14.765 0 0 0-12.339 7.5C4.868 33.313 8.794 47 13.935 54.4c2.524 3.656 5.515 7.78 9.441 7.593 3.832-.187 5.235-2.437 9.815-2.437S39.08 62 43.1 61.9c4.113-.094 6.637-3.75 9.16-7.405a29.782 29.782 0 0 0 4.113-8.53 13.082 13.082 0 0 1-8.039-12.09z"></path>
+                    <path d="M40.762 11.565A13.423 13.423 0 0 0 43.847 2a13.194 13.194 0 0 0-8.787 4.5c-1.963 2.25-3.645 5.812-3.178 9.28 3.365.284 6.824-1.68 8.88-4.215z"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="blackBorder">
+                <div class="notch">
+                  <div class="megaphone"></div>
+                  <div class="camera"></div>
+                </div>
+                <div class="logo">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                    <path d="M48.334 33.875c-.093-7.593 6.169-11.249 6.45-11.436a13.669 13.669 0 0 0-10.936-5.906c-4.674-.469-9.067 2.718-11.5 2.718-2.337 0-5.982-2.718-9.908-2.625a14.765 14.765 0 0 0-12.339 7.5C4.868 33.313 8.794 47 13.935 54.4c2.524 3.656 5.515 7.78 9.441 7.593 3.832-.187 5.235-2.437 9.815-2.437S39.08 62 43.1 61.9c4.113-.094 6.637-3.75 9.16-7.405a29.782 29.782 0 0 0 4.113-8.53 13.082 13.082 0 0 1-8.039-12.09z"></path>
+                    <path d="M40.762 11.565A13.423 13.423 0 0 0 43.847 2a13.194 13.194 0 0 0-8.787 4.5c-1.963 2.25-3.645 5.812-3.178 9.28 3.365.284 6.824-1.68 8.88-4.215z"></path>
+                  </svg>
+                </div>
+                <div class="mainScreen locked">
+                  <div class="statusBar">
+                    <div class="leftSide">
+                      <div class="operator">Jio</div>
+                      <div class="hour hidden"></div>
+                      <div class="widgetPlus"></div>
+                    </div>
+                    <div class="rightSide">
+                      <div class="signal mid"><i class="bar"></i></div>
+                      <div class="data">4G</div>
+                      <div class="battery mid">
+                        <div class="shell"><div class="percent" style="width:65%"></div></div>
+                        <div class="lead"><div class="tip"></div></div>
+                        <div class="percent-value" style="color:#000;font-weight:bold;font-size:9px;z-index:9;margin:80px;"></div>
+                      </div>
+                      <div class="exitShake">Done</div>
+                    </div>
+                  </div>
+                  <div class="lockScreen">
+                    <div class="up">
+                      <div class="lockIcon"></div>
+                      <div class="hour"></div>
+                      <div class="date">Wednesday, 16 of September</div>
+                    </div>
+                    <div class="down">
+                      <div class="sysIcon flash">
+                        <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 400 400">
+                          <path d="M117,62.85v13.72c0,32.45,10.64,61.49,27.43,81.57v206.43h109.71V158.14c16.79-20.08,27.43-49.12,27.43-81.57 V62.85H117z M203.37,246.86c0,6.45-10,6.43-10,0v-41.88c0-6.45,10-6.43,10,0V246.86z M259.35,73.33H136.65c-6.45,0-6.43-10,0-10 h122.69C265.79,63.33,265.78,73.33,259.35,73.33z"/>
+                          <path d="M144.43,364.57v13.71c0,7.57,6.14,13.72,13.71,13.72h82.29c7.57,0,13.71-6.15,13.71-13.72v-13.71H144.43z"/>
+                        </svg>
+                      </div>
+                      <div class="sysIcon camera">
+                        <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 512 512">
+                          <circle cx="256" cy="296" r="81"/>
+                          <path d="m374.297 91-5.177-25.883c-2.794-13.974-15.166-24.117-29.417-24.117h-167.406c-14.25 0-26.623 10.143-29.417 24.117l-5.177 25.883z"/>
+                          <path d="m467 121c-35.223 0-405.516 0-422 0-24.813 0-45 20.187-45 45v260c0 24.813 20.187 45 45 45h422c24.813 0 45-20.187 45-45v-260c0-24.813-20.187-45-45-45zm-339 94h-48c-8.284 0-15-6.716-15-15s6.716-15 15-15h48c8.284 0 15 6.716 15 15s-6.716 15-15 15zm128 192c-61.206 0-111-49.794-111-111s49.794-111 111-111 111 49.794 111 111-49.794 111-111 111z"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="unlockBar" data-msg="Swipe up to Unlock"></div>
+                  </div>
+                  <div class="appScreen hidden">
+                    <div class="mainApps"><div class="wrapperApps"></div></div>
+                    <div class="wrapperDots"></div>
+                    <div class="deckApps">
+                      <div class="app" data-indeck="1"><div class="icon" style="background-image:url(/simulator/Icons/Phone.png)"></div></div>
+                      <div class="app" data-indeck="2"><div class="icon" style="background-image:url(/simulator/Icons/Safari.png)"></div></div>
+                      <div class="app" data-indeck="3"><div class="icon" style="background-image:url(/simulator/Icons/iOsMessage.png)"></div></div>
+                      <div class="app" data-indeck="4"><div class="icon" style="background-image:url(/simulator/Icons/AppleMusic.png)"></div></div>
+                    </div>
+                  </div>
+                  <div class="widgetCenter hidden">
+                    <div class="seeker"><div class="icon"></div>Search</div>
+                    <div class="contents">
+
+                      <div class="block midd events"><p class="txt">No more events for today</p></div>
+                      <div class="block midd batteryInfo" data-load="59">
+                        <div class="iconWrapper">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                            <path d="M14 59a3 3 0 0 0 3 3h30a3 3 0 0 0 3-3v-9H14zM50 5a3 3 0 0 0-3-3H17a3 3 0 0 0-3 3v5h36zm0 45V10m-36 0v40"/>
+                            <circle cx="32" cy="56" r="2"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="block screenTime">
+                        <p class="time">3h 27min</p>
+                      </div>
+                      <div class="editButton">Edit</div>
+                    </div>
+                  </div>
+                  <div class="controlCenter hidden">
+                    <div class="content">
+                      <div class="iconsGroup iconWrapper-wX2 padding">
+                        <div class="actionIcon icon airplaneMode"><div class="ico"><svg viewBox="0 0 510 510" style="transform:rotate(90deg)"><path d="M497.25,357v-51l-204-127.5V38.25C293.25,17.85,275.4,0,255,0c-20.4,0-38.25,17.85-38.25,38.25V178.5L12.75,306v51l204-63.75V433.5l-51,38.25V510L255,484.5l89.25,25.5v-38.25l-51-38.25V293.25L497.25,357z"/></svg></div><div class="txt"><p class="name">Flight Mode</p><p class="val">No</p></div></div>
+                        <div class="actionIcon icon cellularData active"><div class="ico"><svg viewBox="0 0 510 510"><path d="m255.991 169.039c-30.327 0-55 24.673-55 55 0 25.127 16.943 46.356 40 52.904v171.096c0 8.284 6.716 15 15 15s15-6.716 15-15v-171.096c23.057-6.547 40-27.777 40-52.904 0-30.327-24.673-55-55-55z"/></svg></div><div class="txt"><p class="name">Cellular Data</p><p class="val">No</p></div></div>
+                      </div>
+                    </div>
+                    <div class="hiddenCC"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="interactionInfo hidden">
+            <h1>iPhone 12 iOS 14</h1>
+            <p>Interactive interface of <b>iPhone 12</b> with the new <b>iOS 14.</b></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="/simulator/iphone.js"></script>
+</body>
+</html>

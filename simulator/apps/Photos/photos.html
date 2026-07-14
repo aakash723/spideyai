@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Photos</title>
+  <link rel="stylesheet" href="photos.css">
+</head>
+<body>
+  <div class="photos-app">
+    <div class="photos-header">
+      <span>Photos</span>
+      <button class="add-photo-btn" title="Add Photo">+</button>
+      <input type="file" id="photoInput" accept="image/*" hidden>
+    </div>
+    <div class="photos-tabs">
+      <button class="tab active" data-tab="all">All Photos</button>
+      <button class="tab" data-tab="favorites">Favorites</button>
+    </div>
+    <div class="photos-grid" id="photosGrid"></div>
+  </div>
+
+  <div class="photo-detail" id="photoDetail">
+    <div class="detail-top">
+      <button class="detail-back">← Back</button>
+      <span class="detail-title">Photo</span>
+      <span style="width:50px"></span>
+    </div>
+    <div class="detail-img-wrap">
+      <img id="detailImg" src="" alt="photo">
+      <div class="detail-timestamp" id="detailTimestamp"></div>
+    </div>
+    <div class="detail-actions">
+      <button class="action-btn edit-btn" title="Edit">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span>Edit</span>
+      </button>
+      <button class="action-btn revert-btn" id="revertBtn" title="Revert to original">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <span>Revert</span>
+      </button>
+      <button class="action-btn fav-btn" title="Favorite">
+        <svg id="favIcon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span>Favorite</span>
+      </button>
+      <button class="action-btn wall-btn" title="Wallpaper">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Wallpaper</span>
+      </button>
+      <button class="action-btn del-btn" title="Delete">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span>Delete</span>
+      </button>
+    </div>
+    <div class="detail-caption-area">
+      <textarea id="detailCaption" placeholder="Write a memory about this photo..." maxlength="500"></textarea>
+      <button class="detail-save-btn">Save Memory</button>
+    </div>
+  </div>
+
+  <div class="crop-overlay" id="cropOverlay">
+    <div class="crop-header">
+      <button class="crop-cancel" id="cropCancel">Cancel</button>
+      <span class="crop-title">Crop</span>
+      <button class="crop-apply" id="cropApply">Crop</button>
+    </div>
+    <div class="crop-container">
+      <div class="crop-wrapper" id="cropWrapper">
+        <img id="cropImg" src="" alt="crop">
+        <div class="crop-frame" id="cropFrame">
+          <div class="crop-handle nw" data-handle="nw"></div>
+          <div class="crop-handle ne" data-handle="ne"></div>
+          <div class="crop-handle sw" data-handle="sw"></div>
+          <div class="crop-handle se" data-handle="se"></div>
+        </div>
+        <div class="crop-shade top" id="cropShadeT"></div>
+        <div class="crop-shade bottom" id="cropShadeB"></div>
+        <div class="crop-shade left" id="cropShadeL"></div>
+        <div class="crop-shade right" id="cropShadeR"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="photos.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="Contacts.css">
+  <title>Contacts</title>
+</head>
+<body>
+
+<!-- ===== LIST VIEW ===== -->
+<div id="listView" class="ios-contacts-container">
+  <div class="contacts-header">
+    <span class="back-link">&lt; Lists</span>
+    <span class="add-btn" id="showAddForm">+</span>
+  </div>
+  <h1 class="main-title">Contacts</h1>
+  <div class="search-container">
+    <input type="text" class="search-input" id="search-box" placeholder="Search">
+    <span class="mic-icon">🎤</span>
+  </div>
+  <div class="alphabet-sidebar" id="alphabetSidebar">
+    <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span><span>I</span><span>J</span><span>K</span><span>L</span><span>M</span><span>N</span><span>O</span><span>P</span><span>Q</span><span>R</span><span>S</span><span>T</span><span>U</span><span>V</span><span>W</span><span>X</span><span>Y</span><span>Z</span><span>#</span>
+  </div>
+  <div id="contactsList"></div>
+  <div id="deleteAllBtn" class="delete-all" style="display:none">Remove All Contacts</div>
+</div>
+
+<!-- ===== DETAIL VIEW ===== -->
+<div id="detailView" class="detail-container" style="display:none">
+  <div class="edit-nav-bar">
+    <button class="nav-btn cancel-btn" id="backToList">&lt; Contacts</button>
+    <button class="nav-btn done-btn" id="detailEditBtn">Edit</button>
+  </div>
+  <div class="avatar-section">
+    <div class="large-avatar" id="detailAvatar"><span class="avatar-initials">?</span><img class="avatar-img" style="display:none"></div>
+  </div>
+  <h2 class="detail-name" id="detailName"></h2>
+  <div class="detail-card">
+    <div class="detail-label">phone</div>
+    <div class="detail-value" id="detailPhone"></div>
+  </div>
+  <div class="detail-delete" id="deleteContactBtn">Delete Contact</div>
+</div>
+
+<!-- ===== EDIT/CREATE VIEW (shared for add and edit) ===== -->
+<div id="editView" class="ios-edit-container" style="display:none">
+  <div class="edit-nav-bar">
+    <button class="nav-btn cancel-btn" id="editCancel">Cancel</button>
+    <button class="nav-btn done-btn" id="editDone">Done</button>
+  </div>
+  <div class="avatar-section">
+    <div class="large-avatar" id="editAvatar"><span class="avatar-initials">?</span><img class="avatar-img" style="display:none"></div>
+    <button class="add-photo-btn" id="addPhotoBtn">Add Photo</button>
+    <input type="file" id="photoInput" accept="image/*" style="display:none">
+  </div>
+  <div class="input-group">
+    <input type="text" class="text-input" id="editFirstName" placeholder="First name">
+    <input type="text" class="text-input" id="editLastName" placeholder="Last name">
+    <input type="text" class="text-input" id="editCompany" placeholder="Company">
+  </div>
+  <div class="section-divider"></div>
+  <div class="input-group" id="editPhoneList">
+    <div class="action-row" id="phoneRowTemplate">
+      <button class="circle-icon delete-icon phone-delete">−</button>
+      <div class="label-selector">mobile <span class="arrow">&gt;</span></div>
+      <input type="tel" class="field-input phone-input" placeholder="Phone">
+    </div>
+    <div class="action-row clickable-row" id="addPhoneRow">
+      <button class="circle-icon add-icon">+</button>
+      <span class="action-text">add phone</span>
+    </div>
+  </div>
+  <div class="section-divider"></div>
+  <div class="input-group">
+    <div class="action-row clickable-row">
+      <button class="circle-icon add-icon">+</button>
+      <span class="action-text">add email</span>
+    </div>
+  </div>
+</div>
+
+<script src="Contacts.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+/* mobile-landscape.css */
+
+/* Only apply forced rotation on mobile screens in portrait mode */
+@media screen and (max-width: 991px) and (orientation: portrait) {
+  html, body {
+    width: 100vh !important;
+    height: 100vw !important;
+    overflow: hidden !important;
+    position: fixed !important;
+  }
+
+  body {
+    transform: rotate(-90deg) translateX(-100vh) !important;
+    transform-origin: top left !important;
+  }
+
+  /* Force display of rotation notice overlay */
+  #rotate-overlay {
+    display: flex !important;
+  }
+}
+
+/* Default state: hide the overlay when not needed (e.g. landscape or desktop) */
+#rotate-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 10, 15, 0.98);
+  color: #fff;
+  z-index: 999999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', sans-serif;
+  text-align: center;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+#rotate-overlay .phone-icon {
+  width: 50px;
+  height: 90px;
+  border: 3px solid #ff3b30;
+  border-radius: 8px;
+  position: relative;
+  margin-bottom: 25px;
+  animation: rotatePhone 3s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(255, 59, 48, 0.4);
+}
+
+#rotate-overlay .phone-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+@keyframes rotatePhone {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  40%, 60% {
+    transform: rotate(-90deg);
+  }
+}
+
+#rotate-overlay h2 {
+  font-size: 22px;
+  margin-bottom: 12px;
+  letter-spacing: 3px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+#rotate-overlay p {
+  font-size: 14px;
+  color: #8a8a8f;
+  font-family: 'Rajdhani', sans-serif;
+  max-width: 280px;
+  line-height: 1.5;
+  letter-spacing: 1px;
+}

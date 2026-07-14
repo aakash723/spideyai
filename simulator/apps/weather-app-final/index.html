@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="style.css">
+  <title>Weather</title>
+</head>
+<body>
+<div class="weather-app sunny-bg" id="weatherApp">
+  <div class="search-bar">
+    <input type="text" class="city-search" id="citySearch" placeholder="Search city..." autocomplete="off">
+  </div>
+
+  <header class="main-hud">
+    <p class="location-label">MY LOCATION</p>
+    <h1 class="city-name" id="cityName">--</h1>
+    <h2 class="current-temp" id="currentTemp">--</h2>
+    <p class="condition" id="conditionLabel">--</p>
+    <p class="temp-range" id="tempRange">H:-- L:--</p>
+  </header>
+  <div class="forecast-card">
+    <p class="card-summary" id="weatherSummary">Loading weather data...</p>
+    <hr class="card-divider">
+    <div class="hourly-scroll" id="hourlyScroll"></div>
+  </div>
+  <div class="forecast-card">
+    <p class="card-title">📅 10-DAY FORECAST</p>
+    <div id="tenDayList"></div>
+  </div>
+  <div class="forecast-card spidey-card">
+    <p class="card-title">🕷️ SPIDEY AI INSIGHT</p>
+    <p class="spidey-insight" id="spideyInsight">Analyzing conditions...</p>
+  </div>
+  <p class="update-timestamp" id="updateTime"></p>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

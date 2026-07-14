@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spidey Swing</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif; }
+  canvas { display: block; cursor: crosshair; }
+  #hud { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: #fff; font-family: 'Courier New', monospace; font-size: 28px; font-weight: bold; text-shadow: 0 0 20px rgba(92,225,255,0.4); pointer-events: none; z-index: 10; }
+  #controls { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.25); font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 1px; pointer-events: none; z-index: 10; }
+  #controls span { color: rgba(92,225,255,0.4); }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">0</div>
+<div id="controls"><span>CLICK</span> shoot web &nbsp;·&nbsp; <span>RELEASE</span> let go &nbsp;·&nbsp; <span>R</span> restart</div>
+<script>
+const canvas = document.getElementById('c');
+const hud = document.getElementById('hud');
+const ctx = canvas.getContext('2d');
+
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const GROUND_Y_RATIO = 0.85;
+let GROUND_Y;
+const GRAVITY = 980;
+const MAX_ROPE = 600;
+const MIN_ROPE = 60;
+const WORLD_WIDTH = 4000;
+
+let camX = 0, camY = 0;
+let score = 0;
+
+let buildings = [];
+let stars = [];
+
+// Player
+let player = {
+  x: 300, y: 400,
+  vx: 0, vy: 0,
+  anchorX: 0, anchorY: 0,
+  ropeLen: 0,
+  attached: false,
+  onGround: false,
+  time: 0
+};
+
+let mouseDown = false;
+let mx = 0, my = 0;
+
+// Generate buildings
+function generateBuildings() {
+  buildings = [];
+  let x = -200;
+  while (x < WORLD_WIDTH + 200) {
+    const w = 60 + Math.random() * 100;
+    const h = 120 + Math.random() * 350;
+    buildings.push({ x, y: 0, w, h, windows: [] });
+    const cols = Math.max(2, Math.floor(w / 28));
+    const rows = Math.max(2, Math.floor(h / 35));
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const lit = Math.random() > 0.45;
+        const warm = 0.6 + Math.random() * 0.4;
+        buildings[buildings.length-1].windows.push({
+          wx: x + 10 + c * (w - 20) / cols,
+          wy: GROUND_Y - h + 15 + r * (h - 25) / rows,
+          lit, warm, ww: Math.max(8, (w - 20) / cols - 4), wh: Math.max(10, (h - 25) / rows - 5)
+        });
+      }
+    }
+    x += w + 15 + Math.random() * 25;
+  }
+}
+
+function generateStars() {
+  stars = [];
+  for (let i = 0; i < 80; i++) {
+    stars.push({ x: Math.random() * W, y: Math.random() * H * 0.6, r: 0.5 + Math.random() * 1.8, b: 0.3 + Math.random() * 0.7, s: Math.random() * 2 });
+  }
+}
+
+function init() {
+  GROUND_Y = H * GROUND_Y_RATIO;
+  generateBuildings();
+  generateStars();
+  player.x = 300;
+  player.y = GROUND_Y - 60;
+  player.vx = 0; player.vy = 0;
+  player.attached = false;
+  player.onGround = false;
+  score = 0;
+  hud.textContent = '0';
+}
+init();
+
+// Physics
+function update(dt) {
+  dt = Math.min(dt, 0.033);
+  player.time += dt;
+
+  // Mouse attach/release
+  if (mouseDown && !player.attached) {
+    const wx = mx + camX - W/2;
+    const wy = (H - my) + camY - H/2;
+    const dx = wx - player.x;
+    const dy = wy - player.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist >= MIN_ROPE && dist <= MAX_ROPE) {
+      player.anchorX = wx;
+      player.anchorY = wy;
+      player.ropeLen = dist;
+      player.attached = true;
+    }
+  }
+  if (!mouseDown && player.attached) {
+    player.attached = false;
+  }
+
+  // Swing physics
+  if (player.attached) {
+    const dx = player.x - player.anchorX;
+    const dy = player.y - player.anchorY;
+    const len = Math.sqrt(dx*dx + dy*dy);
+
+    if (len > 0.001) {
+      const nx = dx / len;
+      const ny = dy / len;
+
+      player.vy -= GRAVITY * dt;
+
+      // Decompose velocity: radial + tangential
+      const rv = player.vx * nx + player.vy * ny;
+      const rx = nx * rv;
+      const ry = ny * rv;
+      const tx = player.vx - rx;
+      const ty = player.vy - ry;
+
+      // Dampen radial
+      player.vx = tx + rx * 0.02;
+      player.vy = ty + ry * 0.02;
+
+      // Pump forward
+      const dir = player.vx > 0 ? 1 : -1;
+      if (Math.abs(Math.sqrt(player.vx*player.vx + player.vy*player.vy)) < 250) {
+        player.vx += dir * 1.2;
+      }
+    }
+
+    player.x += player.vx * dt;
+    player.y += player.vy * dt;
+
+    // Constrain to rope
+    const dx2 = player.x - player.anchorX;
+    const dy2 = player.y - player.anchorY;
+    const len2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+    if (len2 > 0.001) {
+      const nx2 = dx2 / len2;
+      const ny2 = dy2 / len2;
+      if (len2 > player.ropeLen) {
+        player.x = player.anchorX + nx2 * player.ropeLen;
+        player.y = player.anchorY + ny2 * player.ropeLen;
+        const vDot = player.vx * nx2 + player.vy * ny2;
+        if (vDot > 0) {
+          player.vx -= nx2 * vDot * 1.5;
+          player.vy -= ny2 * vDot * 1.5;
+        }
+      }
+    }
+  } else {
+    player.vy -= GRAVITY * dt;
+    player.x += player.vx * dt;
+    player.y += player.vy * dt;
+  }
+
+  // Ground collision
+  if (player.y > GROUND_Y) {
+    player.y = GROUND_Y;
+    player.vy *= -0.3;
+    player.vx *= 0.95;
+    player.onGround = true;
+    if (Math.abs(player.vy) < 20) player.vy = 0;
+  } else {
+    player.onGround = false;
+  }
+
+  // Wrap
+  if (player.x < -100) player.x = WORLD_WIDTH;
+  if (player.x > WORLD_WIDTH + 100) player.x = 0;
+
+  // Camera
+  const targetCamX = player.x + 150;
+  camX += (targetCamX - camX) * 0.06;
+  camY = H * 0.5;
+
+  // Score
+  const speed = Math.sqrt(player.vx*player.vx + player.vy*player.vy);
+  score += speed * dt * 0.02;
+  hud.textContent = Math.floor(score);
+}
+
+// Drawing
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Sky gradient
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, '#0a0a2e');
+  sky.addColorStop(0.5, '#1a0a20');
+  sky.addColorStop(1, '#0d1520');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.translate(-camX + W/2, -camY + H/2);
+
+  // Stars
+  for (const s of stars) {
+    const sx = s.x + (camX - W/2) * 0.3;
+    const sy = s.y + (camY - H/2) * 0.3;
+    const wrappedX = ((sx % W) + W) % W;
+    ctx.globalAlpha = s.b * 0.5 + Math.sin(player.time * s.s + s.x) * 0.2;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(wrappedX, sy, s.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Buildings
+  for (const b of buildings) {
+    const by = GROUND_Y - b.h;
+
+    // Building body
+    const bright = 0.12 + (b.h / 500) * 0.15;
+    ctx.fillStyle = `rgb(${Math.floor(40 + bright * 100)},${Math.floor(40 + bright * 80)},${Math.floor(55 + bright * 60)})`;
+    ctx.fillRect(b.x, by, b.w, b.h);
+
+    // Roof
+    ctx.fillStyle = 'rgba(20,20,30,0.8)';
+    ctx.fillRect(b.x, by - 3, b.w, 6);
+
+    // Border
+    ctx.strokeStyle = 'rgba(100,120,140,0.15)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(b.x, by, b.w, b.h);
+
+    // Windows
+    for (const w of b.windows) {
+      if (w.wy > GROUND_Y - b.h + 5 && w.wy < GROUND_Y - 5) {
+        if (w.lit) {
+          const flicker = 0.7 + Math.sin(player.time * 3 + w.wx + w.wy) * 0.15;
+          ctx.fillStyle = `rgba(${Math.floor(255 * w.warm * flicker)},${Math.floor(200 * w.warm * flicker)},${Math.floor(80 * flicker)},${0.5 + flicker * 0.2})`;
+        } else {
+          ctx.fillStyle = 'rgba(15,20,30,0.5)';
+        }
+        ctx.fillRect(w.wx, w.wy, w.ww, w.wh);
+      }
+    }
+
+    // Antenna on tall buildings
+    if (b.h > 280 && Math.random() > 0.3) {
+      const ax = b.x + b.w / 2;
+      ctx.strokeStyle = 'rgba(100,100,120,0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(ax, by - 3);
+      ctx.lineTo(ax, by - 25);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(180,50,50,0.4)';
+      ctx.beginPath();
+      ctx.arc(ax, by - 25, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Ground line
+  ctx.strokeStyle = 'rgba(60,80,100,0.3)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-200, GROUND_Y);
+  ctx.lineTo(WORLD_WIDTH + 200, GROUND_Y);
+  ctx.stroke();
+
+  // Web line
+  if (player.attached) {
+    ctx.strokeStyle = 'rgba(200,200,220,0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(player.anchorX, player.anchorY);
+    ctx.lineTo(player.x, player.y);
+    ctx.stroke();
+
+    // Anchor glow
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath();
+    ctx.arc(player.anchorX, player.anchorY, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Spider-Man
+  drawSpidey(player.x, player.y);
+
+  ctx.restore();
+}
+
+function drawSpidey(x, y) {
+  // Web wings when swinging
+  if (player.attached) {
+    const flap = 0.5 + Math.sin(player.time * 10) * 0.3;
+    ctx.globalAlpha = 0.3 * flap;
+    ctx.fillStyle = 'rgba(200,200,255,0.4)';
+    ctx.beginPath();
+    ctx.moveTo(x - 12, y + 5);
+    ctx.lineTo(x - 24, y - 5);
+    ctx.lineTo(x - 14, y - 8);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + 12, y + 5);
+    ctx.lineTo(x + 24, y - 5);
+    ctx.lineTo(x + 14, y - 8);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // Body
+  ctx.fillStyle = '#cc1a1a';
+  ctx.beginPath();
+  ctx.arc(x, y, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Head
+  ctx.fillStyle = '#dd2222';
+  ctx.beginPath();
+  ctx.arc(x, y + 14, 9, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Eyes
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(x - 3, y + 16, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + 3, y + 16, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Pupils
+  ctx.fillStyle = '#111';
+  ctx.beginPath();
+  ctx.arc(x - 3, y + 16, 1.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + 3, y + 16, 1.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Web pattern on body
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(x, y + 2);
+  ctx.lineTo(x - 6, y - 6);
+  ctx.moveTo(x, y + 2);
+  ctx.lineTo(x + 6, y - 6);
+  ctx.stroke();
+
+  // Blue side accents
+  ctx.fillStyle = '#1a2a99';
+  ctx.beginPath();
+  ctx.arc(x - 6, y - 8, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + 6, y - 8, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Legs when on ground
+  if (player.onGround) {
+    ctx.strokeStyle = '#1a2a99';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x - 5, y - 12);
+    ctx.lineTo(x - 9, y - 24);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + 5, y - 12);
+    ctx.lineTo(x + 9, y - 24);
+    ctx.stroke();
+  }
+}
+
+// Input
+canvas.addEventListener('mousedown', e => {
+  mouseDown = true;
+  mx = e.clientX;
+  my = e.clientY;
+});
+canvas.addEventListener('mousemove', e => {
+  mx = e.clientX;
+  my = e.clientY;
+});
+window.addEventListener('mouseup', () => { mouseDown = false; });
+
+// Touch
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  mouseDown = true;
+  mx = t.clientX;
+  my = t.clientY;
+});
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  mx = t.clientX;
+  my = t.clientY;
+});
+canvas.addEventListener('touchend', e => { e.preventDefault(); mouseDown = false; });
+
+// Keyboard
+window.addEventListener('keydown', e => {
+  if (e.key === 'r' || e.key === 'R') {
+    init();
+    camX = 0;
+  }
+  if (e.key === ' ' && player.attached) {
+    player.attached = false;
+  }
+});
+
+// Resize
+window.addEventListener('resize', () => {
+  resize();
+  GROUND_Y = H * GROUND_Y_RATIO;
+  generateBuildings();
+});
+
+// Game loop
+let lastTime = 0;
+function loop(time) {
+  const dt = (time - lastTime) / 1000;
+  lastTime = time;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

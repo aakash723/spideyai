@@ -1,0 +1,29 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/ask", "destination": "/api/server" },
+    { "source": "/speak", "destination": "/api/server" },
+    { "source": "/suggest", "destination": "/api/server" },
+    { "source": "/suggest/speak", "destination": "/api/server" },
+    { "source": "/profile/load", "destination": "/api/server" },
+    { "source": "/profile/context", "destination": "/api/server" },
+    { "source": "/profile/update", "destination": "/api/server" },
+    { "source": "/api/my-location", "destination": "/api/server" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*\\.glb)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/(.*\\.(js|css|wasm))",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}
