@@ -1,62 +1,35 @@
 /* =========================================================
-   SPIDEY AI — MOBILE ROTATION CSS
-   Forces portrait phones into a rotated landscape view
-   so the app looks EXACTLY like the 16:9 laptop screen.
-   Desktop layout is completely untouched (>768px).
+   SPIDEY AI — MOBILE SCALING CSS
+   Forces the EXACT 16:9 desktop layout on mobile phones
+   by rendering at 1280x720 and scaling to fit the screen.
+   Desktop (>1024px) is completely untouched.
    ========================================================= */
 
 /* ── Hide overlay by default ─────────────────────────────── */
 #rotate-overlay { display: none; }
 
 /* ============================================================
-   PORTRAIT PHONES — rotate the whole page -90deg
-   so it appears as landscape (matching the desktop 16:9 view)
+   MOBILE: phones only (max-width 1024px)
+   JS handles scale + rotation via data attributes on <body>
    ============================================================ */
-@media screen and (max-width: 768px) and (orientation: portrait) {
+@media screen and (max-width: 1024px) {
 
-  /* Step 1: make html/body fill the PHYSICAL screen dimensions */
   html {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    background: #000;
   }
 
   body {
-    /* Swap width/height so body fills the landscape space after rotation */
-    width: 100vh;
-    height: 100vw;
-    overflow: hidden;
-    position: fixed;
-    top: 0;
-    left: 0;
-
-    /* Rotate counter-clockwise and shift back into view */
-    transform: rotate(-90deg) translateX(-100%);
-    transform-origin: top left;
-
-    /* After rotation, the "visual" top-left is now the physical bottom-left.
-       We translate -100% along the new X axis (old Y axis) to re-anchor it. */
-  }
-}
-
-/* ============================================================
-   LANDSCAPE PHONES — no rotation needed, just scale to fit
-   Keep the same 16:9 desktop layout, scaled to phone width
-   ============================================================ */
-@media screen and (max-width: 900px) and (orientation: landscape) {
-
-  html, body {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    position: fixed;
-    top: 0;
-    left: 0;
-  }
-
-  /* The app already renders in landscape so no rotation needed.
-     Just make sure nothing overflows. */
-  body {
-    transform: none;
+    /* Fixed desktop render size — JS scales this to fit */
+    width: 1280px !important;
+    height: 720px !important;
+    overflow: hidden !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform-origin: top left !important;
+    /* transform is set dynamically by JS */
   }
 }
