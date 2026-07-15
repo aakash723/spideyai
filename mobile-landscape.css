@@ -1,402 +1,62 @@
 /* =========================================================
-   SPIDEY AI — MOBILE RESPONSIVE LAYOUT
-   Works natively in BOTH portrait and landscape on phones.
-   Desktop layout is completely untouched.
+   SPIDEY AI — MOBILE ROTATION CSS
+   Forces portrait phones into a rotated landscape view
+   so the app looks EXACTLY like the 16:9 laptop screen.
+   Desktop layout is completely untouched (>768px).
    ========================================================= */
 
-/* ── Remove the old forced-rotation hack entirely ──────── */
-#rotate-overlay { display: none !important; }
+/* ── Hide overlay by default ─────────────────────────────── */
+#rotate-overlay { display: none; }
 
 /* ============================================================
-   MOBILE: max-width 768px  (phones in any orientation)
+   PORTRAIT PHONES — rotate the whole page -90deg
+   so it appears as landscape (matching the desktop 16:9 view)
    ============================================================ */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 768px) and (orientation: portrait) {
 
-  /* ── Root reset ───────────────────────────────────────── */
-  html, body {
-    width: 100% !important;
-    height: 100% !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    position: static !important;
-    transform: none !important;
-    background: #000 !important;
-    /* Let the page be scrollable on mobile */
+  /* Step 1: make html/body fill the PHYSICAL screen dimensions */
+  html {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
   }
 
-  /* ── Background image ─────────────────────────────────── */
-  #bg-layer {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 0 !important;
-    background-size: cover !important;
-    background-position: center !important;
-  }
-
-  /* ── 3D Canvas — full-width, fixed height on mobile ───── */
-  #renderCanvas {
-    position: relative !important;
-    width: 100% !important;
-    height: 42vh !important;
-    min-height: 220px !important;
-    max-height: 320px !important;
-    display: block !important;
-    z-index: 2 !important;
-    touch-action: pan-y !important;  /* allow vertical scroll, 3D rotates with horizontal */
-  }
-
-  /* ── iPhone Simulator — hidden on mobile to save space ── */
-  #iphone {
-    display: none !important;
-  }
-
-  /* ── HUD Panel — becomes a scrollable bottom sheet ─────── */
-  #hud {
-    position: relative !important;
-    width: 100% !important;
-    height: auto !important;
-    top: auto !important;
-    right: auto !important;
-    left: 0 !important;
-    overflow-y: visible !important;
-    overflow-x: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 0 !important;
-    padding: 8px 0 120px !important; /* bottom padding for input bar */
-    z-index: 3 !important;
-    pointer-events: auto !important;
-  }
-
-  /* ── HUD Top (level/xp) ─────────────────────────────── */
-  .hud-top {
-    margin: 0 !important;
-    padding: 10px 14px 8px !important;
-    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-  }
-
-  .level-num {
-    font-size: 15px !important;
-    letter-spacing: 2px !important;
-  }
-
-  .xp-bar-track {
-    height: 5px !important;
-  }
-
-  /* ── HUD Cards — full width ─────────────────────────── */
-  .hud-top, .hud-card {
-    margin: 0 8px 6px !important;
-    pointer-events: auto !important;
-  }
-
-  /* ── Map card — taller on mobile ────────────────────── */
-  .map-card { min-height: auto !important; }
-  .map-container { height: 200px !important; }
-  .leaflet-map { height: 200px !important; }
-
-  /* ── Streaks row — wrap ──────────────────────────────── */
-  .streaks-list {
-    flex-wrap: wrap !important;
-    gap: 6px !important;
-  }
-
-  /* ── Stats bars — make them a bit taller ─────────────── */
-  .stats-bar-chart { height: 50px !important; }
-
-  /* ── Glory & Suit grids — fewer columns on phone ──────── */
-  .glory-grid {
-    grid-template-columns: repeat(5, 1fr) !important;
-  }
-  .suit-card .suit-grid {
-    grid-template-columns: repeat(5, 1fr) !important;
-  }
-
-  /* ── Input area — full-width, pinned above keyboard ───── */
-  #inputArea,
-  .input-area {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    transform: none !important;
-    background: url(/input.png) center/100% 100% no-repeat, rgba(0,0,0,0.85) !important;
-    padding: 10px 14px 14px 18px !important;
-    min-height: 54px !important;
-    border-top: 1px solid rgba(255,255,255,0.1) !important;
-    z-index: 100 !important;
-    box-sizing: border-box !important;
-    gap: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-  }
-
-  .input-area textarea {
-    font-size: 16px !important; /* prevents iOS auto-zoom on focus */
-    min-height: 36px !important;
-  }
-
-  .speak-btn {
-    width: 40px !important;
-    height: 40px !important;
-    font-size: 18px !important;
-    flex-shrink: 0 !important;
-  }
-
-  /* ── Status bar ───────────────────────────────────────── */
-  #status {
-    position: fixed !important;
-    top: 8px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    font-size: 11px !important;
-    padding: 4px 12px !important;
-    z-index: 20 !important;
-    max-width: 90vw !important;
-    text-align: center !important;
-  }
-
-  /* ── Subtitle / chat bubble ─────────────────────────── */
-  #subtitle,
-  .subtitle {
-    position: fixed !important;
-    bottom: 62px !important;
-    left: 4px !important;
-    right: 4px !important;
-    max-width: calc(100vw - 8px) !important;
-    width: auto !important;
-    font-size: 13px !important;
-    padding: 6px 30px 42px !important;
-    min-height: 80px !important;
-    z-index: 50 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* ── Celebration overlay — centered, scrollable ─────── */
-  .celebration-content {
-    max-width: 90vw !important;
-    padding: 0 10px !important;
-  }
-
-  .celebration-card {
-    width: 160px !important;
-  }
-
-  .celebration-btn {
-    padding: 8px 20px !important;
-    font-size: 10px !important;
-  }
-
-  /* ── Achievement toast ──────────────────────────────── */
-  .achievement-toast {
-    position: fixed !important;
-    top: auto !important;
-    bottom: 80px !important;
-    right: 8px !important;
-    left: 8px !important;
-    min-width: auto !important;
-    width: auto !important;
-    transform: translateY(200%) !important;
-  }
-
-  .achievement-toast.show {
-    transform: translateY(0) !important;
-  }
-
-  /* ── HUD scanlines — keep decorative ────────────────── */
-  .hud-scanlines {
-    display: none !important; /* saves CPU on mobile */
-  }
-
-  /* ── Card headers — slightly bigger tap targets ─────── */
-  .card-header {
-    font-size: 8px !important;
-    padding-bottom: 5px !important;
-    margin-bottom: 7px !important;
-  }
-
-  /* ── Mission items — easier to tap ─────────────────── */
-  .missions-item {
-    padding: 8px 8px !important;
-    min-height: 40px !important;
-  }
-  .missions-title {
-    font-size: 12px !important;
-  }
-
-  /* ── Quest items — bigger tappable area ──────────────── */
-  .quest-item {
-    font-size: 13px !important;
-    padding: 4px 0 !important;
-  }
-  .quest-item input[type="checkbox"] {
-    width: 16px !important;
-    height: 16px !important;
-  }
-
-  /* ── Insight card text ───────────────────────────────── */
-  .insight-content {
-    font-size: 13px !important;
-  }
-
-  /* ── User controls bar ──────────────────────────────── */
-  .user-controls {
-    padding: 8px 12px !important;
-  }
-  .user-label {
-    font-size: 9px !important;
-  }
-  .user-btn {
-    font-size: 14px !important;
-    padding: 4px 8px !important;
-    min-width: 36px !important;
-    min-height: 32px !important;
-  }
-
-  /* ── Suggest card actions — row wrap ─────────────────── */
-  .suggest-actions {
-    flex-wrap: wrap !important;
-  }
-
-  /* ── Popup legibility on mobile ─────────────────────── */
-  .leaflet-popup-content-wrapper {
-    font-size: 13px !important;
-  }
-
-  /* ── Map legend — compact ────────────────────────────── */
-  .map-legend {
-    flex-wrap: wrap !important;
-    gap: 6px 8px !important;
-  }
-
-  /* ── Pipeline steps ─────────────────────────────────── */
-  .pipeline-step {
-    font-size: 10px !important;
-    padding: 5px 6px !important;
-  }
-
-  /* ── Mission timer ──────────────────────────────────── */
-  .mission-timer {
-    font-size: 14px !important;
-  }
-}
-
-/* ============================================================
-   SMALL PHONES: max-width 380px  (iPhone SE, small Androids)
-   ============================================================ */
-@media screen and (max-width: 380px) {
-
-  #renderCanvas {
-    height: 36vh !important;
-    min-height: 180px !important;
-  }
-
-  .glory-grid,
-  .suit-card .suit-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
-  }
-
-  .level-num {
-    font-size: 13px !important;
-  }
-
-  .celebration-card {
-    width: 130px !important;
-  }
-
-  .map-container { height: 160px !important; }
-  .leaflet-map   { height: 160px !important; }
-
-  .streaks-list {
-    flex-direction: column !important;
-    gap: 4px !important;
-  }
-}
-
-/* ============================================================
-   MOBILE LANDSCAPE: phones rotated sideways (height ≤ 500px)
-   Keep 3D visible + HUD side-by-side
-   ============================================================ */
-@media screen and (max-width: 900px) and (max-height: 500px) {
-
-  html, body {
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    position: static !important;
-    transform: none !important;
-  }
-
-  /* Side-by-side layout in landscape */
   body {
-    display: flex !important;
-    flex-direction: row !important;
-    height: 100vh !important;
-    overflow: hidden !important;
+    /* Swap width/height so body fills the landscape space after rotation */
+    width: 100vh;
+    height: 100vw;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    /* Rotate counter-clockwise and shift back into view */
+    transform: rotate(-90deg) translateX(-100%);
+    transform-origin: top left;
+
+    /* After rotation, the "visual" top-left is now the physical bottom-left.
+       We translate -100% along the new X axis (old Y axis) to re-anchor it. */
+  }
+}
+
+/* ============================================================
+   LANDSCAPE PHONES — no rotation needed, just scale to fit
+   Keep the same 16:9 desktop layout, scaled to phone width
+   ============================================================ */
+@media screen and (max-width: 900px) and (orientation: landscape) {
+
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
   }
 
-  #renderCanvas {
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 55vw !important;
-    height: 100vh !important;
-    max-height: none !important;
+  /* The app already renders in landscape so no rotation needed.
+     Just make sure nothing overflows. */
+  body {
+    transform: none;
   }
-
-  #iphone {
-    display: none !important;
-  }
-
-  #hud {
-    position: fixed !important;
-    right: 0 !important;
-    top: 0 !important;
-    left: 55vw !important;
-    width: 45vw !important;
-    height: 100vh !important;
-    overflow-y: auto !important;
-    padding-bottom: 70px !important;
-  }
-
-  #inputArea,
-  .input-area {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 55vw !important;
-    right: 0 !important;
-    width: 45vw !important;
-    max-width: 45vw !important;
-    transform: none !important;
-    padding: 8px 12px 10px 16px !important;
-    min-height: 50px !important;
-    z-index: 100 !important;
-  }
-
-  #subtitle,
-  .subtitle {
-    position: fixed !important;
-    bottom: 60px !important;
-    left: 2px !important;
-    max-width: 54vw !important;
-    font-size: 12px !important;
-    min-height: 70px !important;
-    padding: 6px 28px 38px !important;
-  }
-
-  #status {
-    left: 27vw !important;
-    transform: translateX(-50%) !important;
-  }
-
-  .achievement-toast {
-    right: 8px !important;
-    left: auto !important;
-    bottom: 75px !important;
-    min-width: 44vw !important;
-  }
-
-  .map-container { height: 130px !important; }
-  .leaflet-map   { height: 130px !important; }
 }
