@@ -3,6 +3,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/:path*.glb", "destination": "https://aakash723.github.io/spideyai/:path*.glb" },
     { "source": "/ask", "destination": "/api/ask" },
     { "source": "/speak", "destination": "/api/speak" },
     { "source": "/geocode", "destination": "/api/geocode" },

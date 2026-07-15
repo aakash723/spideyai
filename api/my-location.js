@@ -1,4 +1,4 @@
-module.exports = async (req, res) => {
+export default async (req, res) => {
   try {
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
       || req.headers['x-real-ip']

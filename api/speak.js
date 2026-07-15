@@ -1,7 +1,7 @@
 const FISH_KEY = '424bf4992ee14191a1f9cc2d47b647cd';
 const FISH_VOICE = '6ecde84528c748aa964fdcc8e21fa4ba';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

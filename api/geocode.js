@@ -1,4 +1,4 @@
-module.exports = async (req, res) => {
+export default async (req, res) => {
   const q = req.query?.q;
   const nearLat = req.query?.lat;
   const nearLon = req.query?.lon;

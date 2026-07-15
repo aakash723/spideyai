@@ -2,7 +2,7 @@ const GROQ_API_KEY = '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';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
