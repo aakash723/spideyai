@@ -154,11 +154,11 @@ export class ToolExecutor extends EngineBase {
 
     const id = `mission_${Date.now()}`;
     const comics = [
-      '/comics/download (85).jpg', '/comics/download (86).jpg', '/comics/download (87).jpg',
-      '/comics/download (88).jpg', '/comics/download (89).jpg', '/comics/download (90).jpg',
-      '/comics/download (91).jpg', '/comics/download (92).jpg', '/comics/download (93).jpg',
-      '/comics/COMIC #2.jpg', '/comics/download (94).jpg', '/comics/download (95).jpg',
-      '/comics/Spidey\'s Last Ride by @WhyNotStuff.jpg',
+      '/comics/comic_1.jpg', '/comics/comic_2.jpg', '/comics/comic_3.jpg',
+      '/comics/comic_4.jpg', '/comics/comic_5.jpg', '/comics/comic_6.jpg',
+      '/comics/comic_7.jpg', '/comics/comic_8.jpg', '/comics/comic_9.jpg',
+      '/comics/comic_10.jpg', '/comics/comic_11.jpg', '/comics/comic_12.jpg',
+      '/comics/comic_13.jpg',
     ];
     // Infer category from title keywords
     const lower = title.toLowerCase();
