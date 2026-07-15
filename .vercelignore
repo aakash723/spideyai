@@ -1,0 +1,7 @@
+# Exclude heavy assets to keep Vercel deployment size under the limit
+*.glb
+*.glb.crdownload
+spidey-classic/
+simulator/apps/music-app/*.mp3
+*.mp4
+*.crdownload
