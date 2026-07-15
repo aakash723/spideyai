@@ -39,27 +39,15 @@ $(function(){
         dynamic: false
       },
       {
-        name: 'Reminders',
-        icon: '/simulator/Icons/Reminders.png',
-        type: 'app',
-        dynamic: false
-      },
-      {
         name: 'Notes',
         icon: '/simulator/Icons/Notes.png',
         type: 'app',
         dynamic: false
       },
       {
-        name: 'Health',
-        icon: '/simulator/Icons/Health.png',
-        type: 'app',
-        dynamic: false
-      },
-      {
         name: 'Message',
         icon: '/simulator/Icons/iOsMessage.png',
-        notifications: 123,
+        notifications: 0,
         type: 'app',
         dynamic: false
       },
@@ -70,13 +58,6 @@ $(function(){
         dynamic: false
       },
       {
-        name: 'Music',
-        icon: '/simulator/Icons/AppleMusic.png',
-        type: 'app',
-        dynamic: false
-      },
-
-      {
         name: 'Contacts',
         icon: '/simulator/Icons/Contacts.png',
         type: 'app',
@@ -85,7 +66,7 @@ $(function(){
       {
         name: 'YouTube',
         icon: '/simulator/Icons/YouTube.png',
-        notifications: 1,
+        notifications: 0,
         type: 'app',
         dynamic: false
       },
@@ -685,11 +666,22 @@ ${app.notifications ? `<div class="notification">${app.notifications}</div>` : '
 
   //Phone App (dock)
   function phone() {
-    alertiOS({
-      headers: 'Phone',
-      messages: 'Phone app is not available in this demo.',
-      actions: [{ text: 'OK', warning: false }]
-    });
+    if (!$('.phoneApp').length) {
+      $('.mainScreen').append(`
+        <div class="phoneApp hidden">
+          <iframe src="/simulator/apps/Phone/Phone.html" style="width:294px;height:520px;border:none;"></iframe>
+        </div>`
+      );
+      $('.phoneApp').touchMov({
+        mov: 'y',
+        movUp: function (e) {
+          $(e.currentTarget).addClass('hidden');
+        }
+      });
+    }
+    setTimeout(function () {
+      $('.phoneApp').removeClass('hidden');
+    }, 100)
   }
 
   //Safari App (dock)
@@ -1082,20 +1074,12 @@ ${app.notifications ? `<div class="notification">${app.notifications}</div>` : '
    phone();
   })
 
-  $('body').on('click', '.app[data-indeck="2"]', function () {
-   safari();
-  })
-
   $('body').on('click', '.app[data-indeck="5"]', function () {
    youTube();
   })
   
   $('body').on('click', '.app[data-indeck="3"]', function () {
    message_deck();
-  }) 
-  
-  $('body').on('click', '.app[data-indeck="4"]', function () {
-   music_deck();
   })
   
 

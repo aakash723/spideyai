@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=1280, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Spidey AI</title>
   <meta property="og:title" content="Spidey AI">
   <meta property="og:description" content="Your friendly neighborhood Spider-Man AI companion">
-  <meta property="og:image" content="https://localhost:5173/og-image.jpg">
+  <meta property="og:image" content="https://peterparker-five.vercel.app/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:type" content="website">
@@ -18,7 +18,6 @@
   <link rel="stylesheet" href="/simulator/iphone.css" />
   <link rel="stylesheet" href="/mobile-landscape.css" />
   <script>
-    // Ensure a completely fresh user profile on first visit to the deployed product
     if (!localStorage.getItem('spidey_ai_fresh_prod_v2')) {
       for (var key in localStorage) {
         if (key.indexOf('spidey_ai_') === 0 || key === 'spideyTechMissions' || key === 'spidey_photos') {
@@ -28,8 +27,8 @@
       localStorage.setItem('spidey_ai_fresh_prod_v2', 'true');
     }
   </script>
-  <script type="module" crossorigin src="/assets/spidey-CvfTzwK3.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/spidey-HsjSoBlw.css">
+  <script type="module" crossorigin src="/assets/spidey-CY7Vec1e.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/spidey-D8nFd1J_.css">
 </head>
 <body>
 
@@ -165,7 +164,7 @@
         <label class="proactive-toggle" id="proactiveToggle">
           <input type="checkbox" checked> <span>AI Chat</span>
         </label>
-        <span style="font-size:8px;color:rgba(255,255,255,0.3);margin-left:auto;">every 30s</span>
+        <span style="font-size:8px;color:rgba(255,255,255,0.3);margin-left:auto;">every 60s</span>
       </div>
       <input type="file" id="importFileInput" accept=".json" style="display:none">
     </div>
@@ -286,9 +285,7 @@
                     <div class="wrapperDots"></div>
                     <div class="deckApps">
                       <div class="app" data-indeck="1"><div class="icon" style="background-image:url(/simulator/Icons/Phone.png)"></div></div>
-                      <div class="app" data-indeck="2"><div class="icon" style="background-image:url(/simulator/Icons/Safari.png)"></div></div>
                       <div class="app" data-indeck="3"><div class="icon" style="background-image:url(/simulator/Icons/iOsMessage.png)"></div></div>
-                      <div class="app" data-indeck="4"><div class="icon" style="background-image:url(/simulator/Icons/AppleMusic.png)"></div></div>
                       <div class="app" data-indeck="5"><div class="icon" style="background-image:url(/simulator/Icons/YouTube.png)"></div></div>
                     </div>
                   </div>
@@ -348,6 +345,20 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="/simulator/iphone.js"></script>
+<script>
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'd') {
+    e.preventDefault();
+    console.log('=== DEBUG DUMP (Ctrl+D) ===');
+    console.log('missions.completed:', JSON.parse(JSON.stringify(window.__store ? window.__store.get('missions.completed') : 'N/A')));
+    console.log('missions.failed:', JSON.parse(JSON.stringify(window.__store ? window.__store.get('missions.failed') : 'N/A')));
+    console.log('stats.period:', window.__store ? window.__store.get('stats.period') : 'N/A');
+    console.log('user.xp:', window.__store ? window.__store.get('user.xp') : 'N/A');
+    console.log('localStorage:', JSON.parse(localStorage.getItem('spidey_ai_default') || '{}'));
+    console.log('===========================');
+  }
+});
+</script>
 <script>
 (function() {
   var MISSIONS_KEY = 'spideyTechMissions';
@@ -446,7 +457,6 @@
           window.__store.set('user.level', level);
         }
         window.__store.set('user.xp', xp);
-        // Trigger full HUD refresh
         if (window.mn && window.mn.refresh) {
           window.mn.refresh();
         }
@@ -506,18 +516,8 @@
 })();
 </script>
 <script>
-document.addEventListener('keydown', function(e) {
-  if (e.ctrlKey && e.key === 'd') {
-    e.preventDefault();
-    console.log('=== DEBUG DUMP (Ctrl+D) ===');
-    console.log('missions.completed:', JSON.parse(JSON.stringify(window.__store ? window.__store.get('missions.completed') : 'N/A')));
-    console.log('missions.failed:', JSON.parse(JSON.stringify(window.__store ? window.__store.get('missions.failed') : 'N/A')));
-    console.log('stats.period:', window.__store ? window.__store.get('stats.period') : 'N/A');
-    console.log('user.xp:', window.__store ? window.__store.get('user.xp') : 'N/A');
-    console.log('localStorage:', JSON.parse(localStorage.getItem('spidey_ai_default') || '{}'));
-    console.log('===========================');
-  }
-});
+(function(){var p=screen.orientation;if(p&&p.lock&&matchMedia("(pointer:coarse)").matches&&innerWidth<1024){p.lock("landscape").catch(function(){})
+var c=document.getElementById("renderCanvas");if(c){c.addEventListener("pointermove",function(e){Object.defineProperties(e,{clientX:{get:function(){return screen.width>screen.height?e.pageX:window.innerWidth-e.pageY},configurable:true},clientY:{get:function(){return screen.width>screen.height?e.pageY:e.pageX},configurable:true}})},true)}}})();
 </script>
 </body>
 </html>

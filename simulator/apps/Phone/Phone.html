@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Phone.css">
+    <title>Phone</title>
+</head>
+<body>
+  <div class="phone-app-container">
+    <div class="phone-header">
+      <h1 id="phone-title">Recents</h1>
+      <button id="clear-recents-btn" class="hidden">Clear</button>
+    </div>
+
+    <div id="view-recents" class="phone-view">
+      <div id="recents-list" class="ios-list"></div>
+    </div>
+
+    <div id="view-dialer" class="phone-view hidden">
+      <div class="dialer-screen">
+        <div id="dialer-output"></div>
+        <div id="dialer-contact-match"></div>
+      </div>
+      <div class="dialer-grid">
+        <div class="dial-btn" data-value="1">1<span>&nbsp;</span></div>
+        <div class="dial-btn" data-value="2">2<span>A B C</span></div>
+        <div class="dial-btn" data-value="3">3<span>D E F</span></div>
+        <div class="dial-btn" data-value="4">4<span>G H I</span></div>
+        <div class="dial-btn" data-value="5">5<span>J K L</span></div>
+        <div class="dial-btn" data-value="6">6<span>M N O</span></div>
+        <div class="dial-btn" data-value="7">7<span>P Q R S</span></div>
+        <div class="dial-btn" data-value="8">8<span>T U V</span></div>
+        <div class="dial-btn" data-value="9">9<span>W X Y Z</span></div>
+        <div class="dial-btn" data-value="*">*<span>&nbsp;</span></div>
+        <div class="dial-btn" data-value="0">0<span>+</span></div>
+        <div class="dial-btn" data-value="#">#<span>&nbsp;</span></div>
+      </div>
+      <div class="dialer-actions">
+        <div class="spacer"></div>
+        <button id="action-call-btn" class="call-btn-circle"></button>
+        <button id="action-backspace-btn" class="backspace-btn invisible">⌫</button>
+      </div>
+    </div>
+
+    <div id="active-call-overlay" class="call-overlay hidden">
+      <div class="call-info">
+        <h2 id="active-call-name">Unknown</h2>
+        <p id="active-call-status">calling...</p>
+      </div>
+      <button id="action-hangup-btn">✕</button>
+    </div>
+
+    <div class="ios-tab-bar">
+      <div class="tab-item active" data-target="view-recents">
+        <span class="tab-icon">🕒</span>
+        <span class="tab-label">Recents</span>
+      </div>
+      <div class="tab-item" data-target="view-dialer">
+        <span class="tab-icon">🔢</span>
+        <span class="tab-label">Keypad</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="Phone.js"></script>
+</body>
+</html>

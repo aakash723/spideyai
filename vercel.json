@@ -1,16 +1,12 @@
 {
+  "version": 2,
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/:path*.glb", "destination": "https://aakash723.github.io/spideyai/:path*.glb" },
-    { "source": "/ask", "destination": "/api/server" },
-    { "source": "/speak", "destination": "/api/server" },
-    { "source": "/suggest", "destination": "/api/server" },
-    { "source": "/suggest/speak", "destination": "/api/server" },
-    { "source": "/profile/load", "destination": "/api/server" },
-    { "source": "/profile/context", "destination": "/api/server" },
-    { "source": "/profile/update", "destination": "/api/server" },
-    { "source": "/api/my-location", "destination": "/api/server" }
+    { "source": "/ask", "destination": "/api/ask" },
+    { "source": "/speak", "destination": "/api/speak" },
+    { "source": "/api/my-location", "destination": "/api/my-location" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -26,5 +22,8 @@
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/*.js": { "maxDuration": 10 }
+  }
 }
