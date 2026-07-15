@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/:path*.glb", "destination": "https://aakash723.github.io/spideyai/:path*.glb" },
     { "source": "/ask", "destination": "/api/server" },
     { "source": "/speak", "destination": "/api/server" },
     { "source": "/suggest", "destination": "/api/server" },
