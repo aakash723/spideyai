@@ -1,5 +1,5 @@
-const TTS_API_URL = process.env.TTS_API_URL || 'https://api.openai.com/v1/audio/speech';
-const TTS_API_KEY = process.env.TTS_API_KEY || process.env.AI_API_KEY || '';
+const FISH_KEY = '424bf4992ee14191a1f9cc2d47b647cd';
+const FISH_VOICE = '6ecde84528c748aa964fdcc8e21fa4ba';
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -7,38 +7,32 @@ module.exports = async (req, res) => {
   }
 
   const { text } = req.body || {};
-
   if (!text) {
     return res.status(400).json({ error: 'Text is required' });
   }
 
-  if (!TTS_API_KEY) {
-    return res.status(503).json({ error: 'TTS not configured — browser fallback will be used' });
-  }
-
   try {
-    const response = await fetch(TTS_API_URL, {
+    const resp = await fetch('https://api.fish.audio/v1/tts', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${FISH_KEY}`,
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TTS_API_KEY}`
+        'model': 's2.1-pro-free'
       },
       body: JSON.stringify({
-        model: 'tts-1',
-        input: text,
-        voice: 'alloy',
-        response_format: 'mp3'
+        text,
+        reference_id: FISH_VOICE
       })
     });
 
-    if (!response.ok) {
-      throw new Error(`TTS API returned ${response.status}`);
+    if (!resp.ok) {
+      throw new Error(`Fish Audio returned ${resp.status}`);
     }
 
-    const arrayBuffer = await response.arrayBuffer();
+    const arrayBuffer = await resp.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
 
-    return res.json({ audio: base64 });
+    return res.json({ audio: base64, format: 'mp3' });
   } catch (err) {
     console.error('TTS API error:', err.message);
     return res.status(503).json({ error: 'TTS unavailable' });

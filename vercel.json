@@ -5,6 +5,7 @@
   "rewrites": [
     { "source": "/ask", "destination": "/api/ask" },
     { "source": "/speak", "destination": "/api/speak" },
+    { "source": "/geocode", "destination": "/api/geocode" },
     { "source": "/api/my-location", "destination": "/api/my-location" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
@@ -24,6 +25,6 @@
     }
   ],
   "functions": {
-    "api/*.js": { "maxDuration": 10 }
+    "api/*.js": { "maxDuration": 30 }
   }
 }
